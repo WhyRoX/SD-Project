@@ -3,44 +3,40 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Graph {
-
+    Map<Integer, Artist> artists = new HashMap<>();
     public Graph(String artistsFilePath, String mentionsFilePath) {
         File artistFile = new File(artistsFilePath);
         File mentionFile = new File(mentionsFilePath);
-        List<Artist> a = new ArrayList<>();
         readLineByLine(artistFile, line -> {
             String[] split = line.split(",");
-            Artist artist = new Artist(Integer.parseInt(split[0]),split[1],split[2]);
-            a.add(artist);
+            String[] categories = split[2].split(";");
+            Artist artist = new Artist(Integer.parseInt(split[0]),split[1],categories);
+            artists.put(artist.getId(), artist);
+            System.out.println(artist);
         });
 
-        System.out.println(a.get(1000).toString());
+        readLineByLine(mentionFile,string -> {
+            String[] split = string.split(",");
+            Artist artist1 = artists.get(Integer.parseInt(split[0]));
+            Artist artist2 = artists.get(Integer.parseInt(split[1]));
+            int mentions = Integer.parseInt(split[2]);
 
+            //System.out.println(artist1.getNom() + "est en lien avec " + artist2.getNom() +" avec "+ mentions+" mentions");
+        });
     }
 
     private void readLineByLine(File file, Consumer<String> consumer){
         try {
             FileInputStream inputStream = new FileInputStream(file);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            String line;
-            while (bufferedInputStream.available() > 0) {
-                line = "";
-                char c;
-                while ((c = (char) bufferedInputStream.read()) != '\n') {
-                    line += c;
-                }
-                consumer.accept(line);
+            Scanner scanner = new Scanner(inputStream);
+            while (scanner.hasNext()){
+                consumer.accept(scanner.nextLine());
             }
-
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
