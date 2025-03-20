@@ -6,7 +6,6 @@ public class Artist {
   private final String nom;
   private final String[] categories;
   private final Map<Artist, Integer> poids;
-  private final Set<Artist> artisteAdjacent = new HashSet<>();
 
   public Artist(int id, String nom, String... categories) {
     this.id = id;
@@ -33,7 +32,7 @@ public class Artist {
   }
 
   public Set<Artist> getArtisteAdjacent() {
-    return artisteAdjacent;
+    return poids.keySet();
   }
 
   @Override
@@ -43,7 +42,6 @@ public class Artist {
             ", nom='" + nom + '\'' +
             ", categories=" + Arrays.toString(categories) +
             ", poids=" + poids.entrySet().stream().map(e -> e.getKey().getId()+":"+e.getValue()).toList() +
-            ", artisteAdjacent=" + artisteAdjacent +
             '}';
   }
 

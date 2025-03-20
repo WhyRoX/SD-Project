@@ -5,6 +5,6 @@ public class Main {
         //graph.trouverCheminLePlusCourt("The Beatles", "Kendji Girac");
 		System.out.println("--------------------------");
 
-    graph.trouverCheminMaxMentions("The Beatles", "Kendji Girac");
+    graph.trouverCheminLePlusCourt("The Beatles", "Kendji Girac");
     }
 }
