@@ -5,7 +5,7 @@ public class Artist {
   private final int id;
   private final String nom;
   private final String[] categories;
-  private final Map<Artist, Integer> poids;
+  private final Map<Artist, Double> poids;
 
   public Artist(int id, String nom, String... categories) {
     this.id = id;
@@ -27,7 +27,7 @@ public class Artist {
     return categories;
   }
 
-  public Map<Artist, Integer> getPoids() {
+  public Map<Artist, Double> getPoids() {
     return poids;
   }
 
