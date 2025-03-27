@@ -103,8 +103,77 @@ public class Graph {
         return null;
     }
 
-    public void trouverCheminMaxMentions(String string, String string2) {
-        Deque<Artist> artists = new ArrayDeque<>();
-        //artists.add()
+    public void trouverCheminMaxMentions(String nomArtiste1, String nomArtiste2) {
+        if (!artistes.containsKey(nomArtiste1) || !artistes.containsKey(nomArtiste2)) {
+            throw new IllegalArgumentException("Les arguments ne sont pas valides");
+        }
+
+        Artist start = artistes.get(nomArtiste1);
+        Artist end = artistes.get(nomArtiste2);
+        SommetsAvecPoidsTotal path = dijkstra(start, end);
+
+        if (path == null) {
+            throw new RuntimeException("Aucun chemin entre " + start.getNom() + " et " + end.getNom());
+        }
+        affichage(path);
+    }
+
+    private SommetsAvecPoidsTotal dijkstra(Artist start, Artist end) {
+        PriorityQueue<SommetsAvecPoidsTotal> queue = new PriorityQueue<>(
+                Comparator.comparingDouble(SommetsAvecPoidsTotal::getPoids)
+        );
+        Map<Integer, Double> distances = new HashMap<>();
+        Map<Integer, Integer> previous = new HashMap<>();
+        Set<Integer> visited = new HashSet<>();
+
+        for (Integer id : artistById.keySet()) {
+            distances.put(id, Double.POSITIVE_INFINITY);
+        }
+        distances.put(start.getId(), 0.0);
+        queue.add(new SommetsAvecPoidsTotal(new int[] { start.getId() }, 0));
+
+        while (!queue.isEmpty()) {
+            SommetsAvecPoidsTotal currentPath = queue.poll();
+            int current = currentPath.getSommets()[ currentPath.getSommets().length - 1 ];
+
+            if (current == end.getId()) {
+                return reconstructChemin(previous, end.getId(), distances.get(end.getId()));
+            }
+
+            if (!visited.contains(current)) {
+                visited.add(current);
+                Artist currentArtist = artistById.get(current);
+
+                for (Map.Entry<Artist, Double> neighbor : currentArtist.getPoids().entrySet()) {
+                    int neighborId = neighbor.getKey().getId();
+                    double weight = neighbor.getValue();
+                    double newDistance = distances.get(current) + weight;
+
+                    if (newDistance < distances.get(neighborId)) {
+                        distances.put(neighborId, newDistance);
+                        previous.put(neighborId, current);
+                        queue.add(new SommetsAvecPoidsTotal(new int[] { neighborId }, newDistance));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private SommetsAvecPoidsTotal reconstructChemin(Map<Integer, Integer> previous, int finish, double totalWeight) {
+        List<Integer> path = new ArrayList<>();
+        Integer current = finish;
+
+        while (current != null) {
+            path.add(0, current);
+            current = previous.get(current);
+        }
+
+        int[] bridges = new int[path.size()];
+        for (int i = 0; i < path.size(); i++) {
+            bridges[i] = path.get(i);
+        }
+
+        return new SommetsAvecPoidsTotal(bridges, totalWeight);
     }
 }
