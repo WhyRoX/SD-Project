@@ -53,7 +53,7 @@ public class Graph {
         if (sommetsWithWeight == null) {
             throw new RuntimeException("Aucun chemin entre " + artist1.getNom() + " et " + artist2.getNom());
         }
-        affichage(cheminBFS(artist1, artist2));
+        affichage(sommetsWithWeight);
     }
 
     private void affichage(SommetsAvecPoidsTotal sommetsWithWeight) {
@@ -104,9 +104,7 @@ public class Graph {
     }
 
     public void trouverCheminMaxMentions(String string, String string2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'trouverCheminMaxMentions'");
+        Deque<Artist> artists = new ArrayDeque<>();
+        //artists.add()
     }
-
-
 }
