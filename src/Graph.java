@@ -49,14 +49,16 @@ public class Graph {
 
         Artist artist1 = artistes.get(nomArtiste1);
         Artist artist2 = artistes.get(nomArtiste2);
-
+        SommetsAvecPoidsTotal sommetsWithWeight = cheminBFS(artist1, artist2);
+        if (sommetsWithWeight == null) {
+            throw new RuntimeException("Aucun chemin entre " + artist1.getNom() + " et " + artist2.getNom());
+        }
         affichage(cheminBFS(artist1, artist2));
     }
 
     private void affichage(SommetsAvecPoidsTotal sommetsWithWeight) {
         if (sommetsWithWeight == null) {
-            System.out.println("Pas de chemin trouvé");
-            return;
+            throw new IllegalArgumentException("Les arguments ne sont pas valides");
         }
         int[] sommets = sommetsWithWeight.getSommets();
         System.out.println("Longueur du chemin: " + (sommets.length - 1));
