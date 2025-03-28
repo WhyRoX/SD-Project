@@ -1,6 +1,6 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -31,13 +31,12 @@ public class Graph {
   }
 
   private void readLineByLine(File file, Consumer<String> consumer) {
-    try {
-      FileInputStream inputStream = new FileInputStream(file);
-      Scanner scanner = new Scanner(inputStream);
-      while (scanner.hasNext()) {
-        consumer.accept(scanner.nextLine());
+    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+      String s;
+      while ((s = reader.readLine()) != null) {
+        consumer.accept(s);
       }
-    } catch (FileNotFoundException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
