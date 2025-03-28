@@ -77,14 +77,10 @@ public class Graph {
     Set<Integer> visited = new HashSet<>();
     queue.add(new SommetsAvecPoidsTotal(new int[]{start.getId()}, 0));
 
-    while (!queue.isEmpty()) {
+    while (!queue.isEmpty() && queue.peek().getSommets()[queue.peek().getSommets().length - 1] != end.getId()) {
       SommetsAvecPoidsTotal pathWithWeight = queue.poll();
       int[] path = pathWithWeight.getSommets();
       int current = path[path.length - 1];
-
-      if (current == end.getId()) {
-        return pathWithWeight;
-      }
 
       if (!visited.contains(current)) {
         visited.add(current);
@@ -103,6 +99,9 @@ public class Graph {
         }
       }
     }
+    if (!queue.isEmpty()) {
+      return queue.peek();
+    }
     return null;
   }
 
@@ -113,7 +112,7 @@ public class Graph {
 
     Artist start = artistes.get(nomArtiste1);
     Artist end = artistes.get(nomArtiste2);
-    SommetsAvecPoidsTotal path = dijkstra(start, end);
+    SommetsAvecPoidsTotal path = cheminDijkstra(start, end);
 
     if (path == null) {
       throw new RuntimeException("Aucun chemin entre " + start.getNom() + " et " + end.getNom());
@@ -121,66 +120,57 @@ public class Graph {
     affichage(path);
   }
 
-  private SommetsAvecPoidsTotal dijkstra(Artist start, Artist end) {
-    // Track distances and previous nodes
+  private static class DistanceNode {
+    int id;
+    double distance;
+
+    DistanceNode(int id, double distance) {
+      this.id = id;
+      this.distance = distance;
+    }
+  }
+
+  private SommetsAvecPoidsTotal cheminDijkstra(Artist start, Artist end) {
     Map<Integer, Double> distances = new HashMap<>();
     Map<Integer, Integer> previous = new HashMap<>();
-    Set<Integer> settled = new HashSet<>();
+    Set<Integer> visited = new HashSet<>();
 
-    // Priority queue with nodes ordered by distance
-    PriorityQueue<Integer> queue = new PriorityQueue<>(
-        Comparator.comparingDouble(distances::get)
-    );
+    PriorityQueue<DistanceNode> queue = new PriorityQueue<>(Comparator.comparingDouble(n -> n.distance));
 
-    // Initialize distances
-    for (Integer id : artistById.keySet()) {
-      distances.put(id, Double.POSITIVE_INFINITY);
-    }
-
-    // Set start distance to 0
     distances.put(start.getId(), 0.0);
-    queue.add(start.getId());
+    queue.add(new DistanceNode(start.getId(), 0.0));
 
-    while (!queue.isEmpty()) {
-      Integer currentId = queue.poll();
+    while (!queue.isEmpty() && !visited.contains(end.getId())) {
+      DistanceNode currentNode = queue.poll();
+      int currentId = currentNode.id;
 
-      // Skip if already processed
-      if (settled.contains(currentId)) {
-        continue;
-      }
+      if (visited.contains(currentId)) continue;
+      visited.add(currentId);
 
-      // If we've reached the target
-      if (currentId.equals(end.getId())) {
-        return reconstructChemin(previous, start.getId(), end.getId(), distances.get(end.getId()));
-      }
-
-      // Mark as processed
-      settled.add(currentId);
-
-      // Process neighbors
       Artist currentArtist = artistById.get(currentId);
-      for (Map.Entry<Artist, Double> neighborEntry : currentArtist.getPoids().entrySet()) {
-        Artist neighborArtist = neighborEntry.getKey();
-        int neighborId = neighborArtist.getId();
-        double weight = neighborEntry.getValue();
+      for (Map.Entry<Artist, Double> entry : currentArtist.getPoids().entrySet()) {
+        Artist neighbor = entry.getKey();
+        int neighborId = neighbor.getId();
+        double weight = entry.getValue();
 
-        // Skip if neighbor already processed
-        if (settled.contains(neighborId)) {
-          continue;
-        }
+        if (visited.contains(neighborId)) continue;
 
-        double newDistance = distances.get(currentId) + weight;
+        double newDist = currentNode.distance + weight;
+        double currentNeighborDist = distances.getOrDefault(neighborId, Double.POSITIVE_INFINITY);
 
-        // Update if found better path
-        if (newDistance < distances.get(neighborId)) {
-          distances.put(neighborId, newDistance);
+        if (newDist < currentNeighborDist) {
+          distances.put(neighborId, newDist);
           previous.put(neighborId, currentId);
-          queue.add(neighborId);
+          queue.add(new DistanceNode(neighborId, newDist));
         }
       }
     }
 
-    return null; // No path found
+    if (!visited.contains(end.getId())) {
+      return null;
+    }
+
+    return reconstructChemin(previous, start.getId(), end.getId(), distances.get(end.getId()));
   }
 
   private SommetsAvecPoidsTotal reconstructChemin(Map<Integer, Integer> previous, int start,
